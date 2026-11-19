@@ -1,0 +1,12 @@
+{
+  "name": "richu-recurring-schedule",
+  "version": "1.0.0",
+  "private": true,
+  "description": "日序 · 周期任务日程管理",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  }
+}

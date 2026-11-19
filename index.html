@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f2efe6">
+  <title>日序 · 周期任务日程</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="auth-locked">
+  <section class="auth-screen" id="authScreen" aria-label="用户登录与注册">
+    <div class="auth-visual">
+      <div class="auth-brand">
+        <span class="brand-mark" aria-hidden="true">
+          <span class="brand-orbit"></span>
+          <span class="brand-dot"></span>
+        </span>
+        <span class="brand-copy">
+          <span class="brand-eyebrow">DAILY RHYTHM</span>
+          <span class="brand-name">日序</span>
+        </span>
+      </div>
+      <div class="auth-visual__copy">
+        <p class="auth-visual__eyebrow">PRIVATE RHYTHMS · YOUR OWN SPACE</p>
+        <h2>让日程，<br>只属于你。</h2>
+        <p>每个账户拥有独立的数据空间。登录之后，周期事项与完成记录都只在你自己的日程中发生。</p>
+      </div>
+      <div class="auth-visual__rings" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </div>
+      <p class="auth-visual__quote">把重复发生的事，安放进自己的时间。</p>
+    </div>
+
+    <div class="auth-panel">
+      <div class="auth-mobile-brand" aria-hidden="true">
+        <span class="brand-mark"><span class="brand-orbit"></span><span class="brand-dot"></span></span>
+        <span class="brand-name">日序</span>
+      </div>
+      <div class="auth-loading" id="authLoading">
+        <span class="status-spinner" aria-hidden="true"></span>
+        <p>正在确认登录状态…</p>
+      </div>
+
+      <div class="auth-content" id="authContent" hidden>
+        <div class="auth-tabs" role="tablist" aria-label="账户操作">
+          <button class="is-active" type="button" data-auth-mode="login" role="tab" aria-selected="true">登录</button>
+          <button type="button" data-auth-mode="register" role="tab" aria-selected="false">注册</button>
+        </div>
+        <h1 id="authTitle">欢迎回来</h1>
+        <p class="auth-subtitle" id="authSubtitle">登录后继续查看你的周期日程。</p>
+
+        <form id="authForm" novalidate>
+          <div class="field">
+            <label for="authUsername">用户名</label>
+            <input class="text-input" id="authUsername" name="username" type="text" autocomplete="username" maxlength="24" placeholder="3–24 个字符" required>
+          </div>
+          <div class="field">
+            <label for="authPassword">密码</label>
+            <input class="text-input" id="authPassword" name="password" type="password" autocomplete="current-password" maxlength="128" placeholder="至少 8 个字符" required>
+          </div>
+          <div class="field" id="authConfirmField" hidden>
+            <label for="authConfirmPassword">确认密码</label>
+            <input class="text-input" id="authConfirmPassword" name="confirmPassword" type="password" autocomplete="new-password" maxlength="128" placeholder="再次输入密码">
+          </div>
+          <p class="auth-hint" id="authPasswordHint" hidden>密码至少需要 8 个字符。</p>
+          <p class="auth-error" id="authError" role="alert" hidden></p>
+          <button class="btn btn--primary auth-submit" id="authSubmitBtn" type="submit">登录</button>
+        </form>
+
+        <p class="auth-note">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+          每个账户的日程数据完全隔离
+        </p>
+      </div>
+
+      <div class="auth-server-error" id="authServerError" hidden>
+        <span class="auth-server-error__mark" aria-hidden="true">!</span>
+        <h2>暂时无法连接服务器</h2>
+        <p id="authServerErrorText">请稍后重试。</p>
+        <button class="btn btn--ghost" id="authRetryBtn" type="button">重新连接</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="page-glow page-glow--one" aria-hidden="true"></div>
+  <div class="page-glow page-glow--two" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <a class="brand" href="#" id="brandHome" aria-label="返回月视图">
+      <span class="brand-mark" aria-hidden="true">
+        <span class="brand-orbit"></span>
+        <span class="brand-dot"></span>
+      </span>
+      <span class="brand-copy">
+        <span class="brand-eyebrow">DAILY RHYTHM</span>
+        <span class="brand-name">日序</span>
+      </span>
+    </a>
+
+    <div class="header-actions">
+      <button class="btn btn--ghost header-today" id="headerTodayBtn" type="button">
+        <span class="today-dot" aria-hidden="true"></span>
+        今天
+      </button>
+      <button class="btn btn--primary" id="newTaskBtn" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        新建事项
+      </button>
+      <div class="user-chip" id="userChip" hidden>
+        <span class="user-avatar" id="userAvatar" aria-hidden="true">U</span>
+        <span class="user-name" id="userName"></span>
+        <button class="user-logout" id="logoutBtn" type="button" aria-label="退出登录" title="退出登录">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <section class="calendar-card" aria-label="日程日历">
+      <div class="calendar-topbar">
+        <div class="period-heading">
+          <p class="section-kicker" id="periodKicker">MONTHLY VIEW</p>
+          <div class="period-title-row">
+            <h1 id="periodTitle">2026年5月</h1>
+            <span class="period-subtitle" id="periodSubtitle"></span>
+          </div>
+        </div>
+
+        <div class="calendar-controls">
+          <div class="nav-buttons" aria-label="切换日期">
+            <button class="icon-btn" id="prevBtn" type="button" aria-label="上一页">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <button class="btn btn--soft today-btn" id="todayBtn" type="button">今天</button>
+            <button class="icon-btn" id="nextBtn" type="button" aria-label="下一页">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+          </div>
+
+          <div class="view-switch" role="tablist" aria-label="视图切换">
+            <button class="view-tab is-active" data-view="month" type="button" role="tab" aria-selected="true">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 2v4M16 2v4M3 9h18"/></svg>
+              月视图
+            </button>
+            <button class="view-tab" data-view="week" type="button" role="tab" aria-selected="false">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 2v4M16 2v4M3 9h18M8 13h.01M12 13h.01M16 13h.01M8 17h.01M12 17h.01"/></svg>
+              周视图
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="calendar-body">
+        <section class="view-panel is-active" id="monthView" aria-label="月视图">
+          <div class="weekday-row" aria-hidden="true">
+            <span>周一</span><span>周二</span><span>周三</span><span>周四</span><span>周五</span><span class="weekend">周六</span><span class="weekend">周日</span>
+          </div>
+          <div class="month-grid" id="monthGrid"></div>
+        </section>
+
+        <section class="view-panel" id="weekView" aria-label="周视图" hidden>
+          <div class="week-list" id="weekList"></div>
+        </section>
+
+        <section class="view-panel day-view" id="dayView" aria-label="单日视图" hidden>
+          <div id="dayViewContent"></div>
+        </section>
+      </div>
+    </section>
+
+    <aside class="sidebar">
+      <section class="next-card" id="nextCard" aria-label="今日总览">
+        <div class="next-card__topline">
+          <span class="eyebrow-light">TODAY OVERVIEW</span>
+          <span class="next-card__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1"/></svg>
+          </span>
+        </div>
+        <div id="nextCardContent"></div>
+      </section>
+
+      <section class="tasks-card" aria-label="全部周期事项">
+        <div class="tasks-card__head">
+          <div>
+            <p class="section-kicker">MY RHYTHMS</p>
+            <h2>全部事项</h2>
+          </div>
+          <span class="count-badge" id="taskCount">0</span>
+        </div>
+        <div class="task-list" id="taskList"></div>
+        <button class="add-task-row" id="sideNewTaskBtn" type="button">
+          <span class="add-task-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          </span>
+          新建周期事项
+        </button>
+      </section>
+
+      <p class="sidebar-note">让重复发生的事，成为生活的刻度。</p>
+    </aside>
+  </main>
+
+  <!-- Event editor modal -->
+  <div class="modal-backdrop" id="modalBackdrop" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal__header">
+        <div>
+          <p class="section-kicker" id="modalKicker">NEW RHYTHM</p>
+          <h2 id="modalTitle">新建周期事项</h2>
+        </div>
+        <button class="icon-btn modal-close" id="modalCloseBtn" type="button" aria-label="关闭">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <form id="taskForm" novalidate>
+        <input type="hidden" id="taskId" name="taskId">
+
+        <div class="field" id="taskTypeField">
+          <label>事项类型</label>
+          <div class="task-type-switch" id="taskTypeSwitch" role="radiogroup" aria-label="事项类型">
+            <button class="task-type-option is-active" type="button" data-task-type="fixed" role="radio" aria-checked="true">
+              <span class="task-type-option__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+              </span>
+              <span class="task-type-option__copy">
+                <strong>固定间隔</strong>
+                <small>按间隔落在对应日期</small>
+              </span>
+            </button>
+            <button class="task-type-option" type="button" data-task-type="window" role="radio" aria-checked="false">
+              <span class="task-type-option__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M5 12h14M8 8l-4 4 4 4M16 8l4 4-4 4"/></svg>
+              </span>
+              <span class="task-type-option__copy">
+                <strong>区间完成</strong>
+                <small>在间隔区间内灵活完成</small>
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <div class="field" id="windowModeField" hidden>
+          <label>区间完成方式</label>
+          <div class="window-mode-options" id="windowModeOptions" role="radiogroup" aria-label="区间完成方式">
+            <button class="window-mode-option is-active" type="button" data-window-mode="continuous" role="radio" aria-checked="true">
+              <span class="window-mode-option__mark" aria-hidden="true"></span>
+              <span>
+                <strong>连续进行</strong>
+                <small>贯穿整个区间，适合持续任务</small>
+              </span>
+            </button>
+            <button class="window-mode-option" type="button" data-window-mode="flexible" role="radio" aria-checked="false">
+              <span class="window-mode-option__mark" aria-hidden="true"></span>
+              <span>
+                <strong>灵活完成</strong>
+                <small>区间内任意一天完成即可</small>
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="taskTitle">事项名称</label>
+          <input class="text-input" type="text" id="taskTitle" name="title" placeholder="例如：晨间阅读" maxlength="40" autocomplete="off" required>
+          <p class="field-error" id="titleError" hidden>请给这件事起一个名字</p>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="taskStartDate" id="startDateLabel">开始日期</label>
+            <input class="text-input" type="date" id="taskStartDate" name="startDate" required>
+          </div>
+
+          <div class="field" id="intervalField">
+            <label for="taskInterval" id="intervalLabel">重复间隔</label>
+            <div class="interval-input-wrap">
+              <span>每</span>
+              <input class="text-input interval-input" type="number" id="taskInterval" name="interval" min="1" max="365" step="1" value="1" required>
+              <span>天</span>
+            </div>
+            <p class="field-error" id="intervalError" hidden>请输入 1–365 之间的天数</p>
+          </div>
+        </div>
+
+        <div class="quick-intervals" id="quickIntervals" aria-label="常用重复间隔">
+          <button type="button" data-interval="1">每日</button>
+          <button type="button" data-interval="2">每 2 日</button>
+          <button type="button" data-interval="3">每 3 日</button>
+          <button type="button" data-interval="7">每周</button>
+          <button type="button" data-interval="14">每两周</button>
+        </div>
+
+        <div class="field">
+          <label>标记颜色</label>
+          <div class="color-options" id="colorOptions" role="radiogroup" aria-label="标记颜色">
+            <button type="button" class="color-swatch is-selected" data-color="moss" style="--swatch:#59755e" aria-label="苔绿" aria-checked="true" role="radio"></button>
+            <button type="button" class="color-swatch" data-color="clay" style="--swatch:#c66d4b" aria-label="陶土" aria-checked="false" role="radio"></button>
+            <button type="button" class="color-swatch" data-color="ocean" style="--swatch:#4c7383" aria-label="雾蓝" aria-checked="false" role="radio"></button>
+            <button type="button" class="color-swatch" data-color="plum" style="--swatch:#8a6173" aria-label="梅子" aria-checked="false" role="radio"></button>
+            <button type="button" class="color-swatch" data-color="ochre" style="--swatch:#b18b45" aria-label="赭黄" aria-checked="false" role="radio"></button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="taskNote">备注 <span class="optional">可选</span></label>
+          <textarea class="text-input" id="taskNote" name="note" rows="2" maxlength="120" placeholder="写下一点提醒或说明…"></textarea>
+        </div>
+
+        <div class="rhythm-preview">
+          <span class="preview-dot" id="previewDot" aria-hidden="true"></span>
+          <p id="rhythmPreview">从今天开始，每天出现一次</p>
+        </div>
+
+        <div class="modal__footer">
+          <button class="btn btn--danger-text" id="deleteTaskBtn" type="button" hidden>删除事项</button>
+          <div class="modal__footer-actions">
+            <button class="btn btn--ghost" id="cancelBtn" type="button">取消</button>
+            <button class="btn btn--primary" type="submit">保存事项</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Time point configuration -->
+  <div class="modal-backdrop" id="timePointModalBackdrop" hidden>
+    <div class="modal modal--time-points" role="dialog" aria-modal="true" aria-labelledby="timePointModalTitle">
+      <div class="modal__header">
+        <div>
+          <p class="section-kicker">DAY STRUCTURE</p>
+          <h2 id="timePointModalTitle">时间点设置</h2>
+        </div>
+        <button class="icon-btn modal-close" id="timePointModalCloseBtn" type="button" aria-label="关闭">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <form id="timePointForm" novalidate>
+        <p class="time-point-intro">时间点会作为日视图中的横向分隔线。周期事项拖动到某个区间后，该事项在所有日期的位置都会同步改变。</p>
+        <div class="time-point-list" id="timePointList"></div>
+        <button class="add-time-point-btn" id="addTimePointBtn" type="button">
+          <span aria-hidden="true">+</span>
+          添加时间点
+        </button>
+        <p class="field-error time-point-error" id="timePointError" role="alert" hidden></p>
+        <p class="time-point-note">至少保留一个时间点，最多 12 个。</p>
+
+        <div class="modal__footer">
+          <div class="modal__footer-actions">
+            <button class="btn btn--ghost" id="timePointCancelBtn" type="button">取消</button>
+            <button class="btn btn--primary" id="timePointSubmitBtn" type="submit">保存时间点</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden>
+    <span class="toast-dot" aria-hidden="true"></span>
+    <span id="toastText"></span>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
